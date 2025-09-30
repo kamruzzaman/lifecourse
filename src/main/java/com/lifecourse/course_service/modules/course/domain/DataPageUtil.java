@@ -1,0 +1,30 @@
+package com.lifecourse.course_service.modules.course.domain;
+
+import com.lifecourse.course_service.modules.course.config.DataPage;
+import org.springframework.data.domain.Page;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class DataPageUtil {
+
+   public static DataPage convertToDatapage(Page<?> convertToPageModel) {
+        List<?> empty=new ArrayList<>();
+        DataPage dataPage=new DataPage();
+        if(convertToPageModel==null || convertToPageModel.getTotalElements()==0){
+            dataPage.setContent(empty);
+            dataPage.setMessage("No Data Found");
+        }
+        else{
+            dataPage.setContent(convertToPageModel.getContent());
+        }
+        dataPage.setTotalPages(convertToPageModel.getTotalPages());
+        dataPage.setLast(convertToPageModel.isLast());
+        dataPage.setFirst(convertToPageModel.isFirst());
+        dataPage.setSize(convertToPageModel.getSize());
+        dataPage.setMessage("Data Found");
+        dataPage.setTotalElements(convertToPageModel.getTotalElements());
+        dataPage.setPage(convertToPageModel.getPageable().getPageNumber());
+        return dataPage;
+    }
+}

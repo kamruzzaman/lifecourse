@@ -1,0 +1,67 @@
+# -------------------------
+# Maven / Gradle
+# -------------------------
+/target/
+/build/
+
+# -------------------------
+# Spring Boot specific
+# -------------------------
+/*.log
+/*.tmp
+/*.pid
+
+# -------------------------
+# IDE files
+# -------------------------
+# IntelliJ IDEA
+/.idea/
+/*.iml
+/out/
+/*.iws
+
+# Eclipse
+/.classpath
+/.project
+/.settings/
+
+# VS Code
+/.vscode/
+
+# -------------------------
+# OS files
+# -------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# -------------------------
+# Logs
+# -------------------------
+*.log
+logs/
+*.trace
+
+# -------------------------
+# Environment files
+# -------------------------
+.env
+*.env
+
+# -------------------------
+# Others
+# -------------------------
+*.class
+*.jar
+*.war
+*.ear
+*.db
+*.sqlite
+
