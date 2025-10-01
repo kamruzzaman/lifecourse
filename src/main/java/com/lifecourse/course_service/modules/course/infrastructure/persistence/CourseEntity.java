@@ -1,8 +1,11 @@
 package com.lifecourse.course_service.modules.course.infrastructure.persistence;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lifecourse.course_service.modules.course.web.dto.Category;
+import com.lifecourse.course_service.modules.course.web.dto.CourseLevel;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -12,12 +15,18 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Data
 @Accessors(chain = true)  // ✅ Placed after @Data
 @Entity
-@Table(name = "courses")
+@Table(name = "courses",
+        indexes = @Index(name = "idx_course_title", columnList = "title"))
 @EntityListeners(AuditingEntityListener.class)
+@Builder
 public class CourseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "course_id_generator")
@@ -37,16 +46,19 @@ public class CourseEntity {
     @Column(columnDefinition = "TEXT") // MySQL-specific for long text
     private String description;
 
+    @ElementCollection(targetClass = Category.class)
+    @CollectionTable(name = "course_categories", joinColumns = @JoinColumn(name = "course_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private Set<Category> categories = new HashSet<>();
 
-    private String category;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    private List<ChapterEntity> chapters = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private CourseLevel level = CourseLevel.BEGINNER;
 
     private BigDecimal price = BigDecimal.ZERO;
-
-    @Column(name = "thumbnail_url")
-    private String thumbnailUrl;
 
     @Column(name = "instructor_id", nullable = false)
     private Long instructorId;

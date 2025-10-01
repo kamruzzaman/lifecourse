@@ -44,9 +44,7 @@ public class ChapterRepositoryAdapter {
             ChapterEntity chapter=new ChapterEntity()
                     .setTitle(request.title())
                     .setCourse(courseEntity)
-                    .setFileId(request.fileId())
                     .setContentDescription(request.contentDescription())
-                    .setContentUrl(request.contentUrl())
                     .setOrderIndex(request.orderIndex());
 
             chapterRepository.save(chapter);
@@ -55,8 +53,7 @@ public class ChapterRepositoryAdapter {
                     chapter.getId(),
                     chapter.getTitle(),
                     chapter.getContentDescription(),
-                    chapter.getOrderIndex(),
-                    chapter.getContentUrl()
+                    chapter.getOrderIndex()
             );
             chapterEntityAtomicReference.set(chapterResponse);
 
@@ -74,17 +71,14 @@ public class ChapterRepositoryAdapter {
             courseRepository.findById(request.courseId()).ifPresent(courseEntity -> {
                 chapterEntity.setTitle(request.title())
                         .setCourse(courseEntity)
-                        .setFileId(request.fileId())
                         .setContentDescription(request.contentDescription())
-                        .setContentUrl(request.contentUrl())
                         .setOrderIndex(request.orderIndex());
                 chapterRepository.save(chapterEntity);
                 ChapterResponse chapterResponse = new ChapterResponse(
                         chapterEntity.getId(),
                         chapterEntity.getTitle(),
                         chapterEntity.getContentDescription(),
-                        chapterEntity.getOrderIndex(),
-                        chapterEntity.getContentUrl()
+                        chapterEntity.getOrderIndex()
                 );
                 chapterEntityAtomicReference.set(chapterResponse);
             });

@@ -1,14 +1,14 @@
 package com.lifecourse.course_service.modules.course.web.dto;
 
 import java.util.List;
+import java.util.Set;
 
 public record CourseResponse(
         Long id,
         String title,
         String description,
-        String category,
+        Set<Category> category,
         String level,
-        String thumbnailUrl,
         List<ChapterResponse> chapters,
         List<InstructorResponse> instructors
 ) { }

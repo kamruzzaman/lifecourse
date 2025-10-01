@@ -48,63 +48,50 @@ public class CourseRepositoryAdapter {
     public void delete(Long id) {
         courseRepository.deleteById(id);
     }
-
+    private CourseResponse mapToCourseResponse(CourseEntity course) {
+        return new CourseResponse(
+                course.getId(),
+                course.getTitle(),
+                course.getDescription(),
+                course.getCategories(),
+                course.getLevel().name(),
+                Collections.emptyList(), // chapters
+                Collections.emptyList()  // instructors
+        );
+    }
 
     public CourseResponse createCourse(CreateCourseRequest request) {
-        CourseEntity course = new CourseEntity()
-                .setTitle(request.title())
-                .setDescription(request.description())
-                .setCategory(request.category())
-                .setLevel(request.level())
-                .setPrice(request.price())
-                .setThumbnailUrl(request.thumbnailUrl())
-                .setInstructorId(request.instructorId())
-                .setDurationMinutes(request.durationMinutes())
-                .setPublished(request.published() != null && request.published());
+        CourseEntity course = CourseEntity.builder()
+                .title(request.title())
+                .description(request.description())
+                .categories(request.category())
+                .level(request.level())
+                .price(request.price())
+                .instructorId(request.instructorId())
+                .durationMinutes(request.durationMinutes())
+                .published(Boolean.TRUE.equals(request.published()))
+                .build();
 
-        CourseEntity savedCourseEntity=courseRepository.save(course);
-        return  new CourseResponse(
-                savedCourseEntity.getId(),
-                savedCourseEntity.getTitle(),
-                savedCourseEntity.getDescription(),
-                savedCourseEntity.getCategory(),
-                savedCourseEntity.getLevel().name(), // assuming enum
-                savedCourseEntity.getThumbnailUrl(),
-                Collections.emptyList(),      // List<ChapterResponse>
-                Collections.emptyList() // List<InstructorResponse>
-        );
+        CourseEntity savedCourse = courseRepository.save(course);
+        return mapToCourseResponse(savedCourse);
 
     }
 
     public CourseResponse editCourse(Long id, CreateCourseRequest request) {
-        courseRepository.findById(id).ifPresent(course -> {
-            course.setTitle(request.title())
-                    .setDescription(request.description())
-                    .setCategory(request.category())
-                    .setLevel(request.level())
-                    .setPrice(request.price())
-                    .setThumbnailUrl(request.thumbnailUrl())
-                    .setInstructorId(request.instructorId())
-                    .setDurationMinutes(request.durationMinutes())
-                    .setPublished(request.published() != null && request.published());
+        return courseRepository.findById(id)
+                .map(course -> {
+                    course.setTitle(request.title())
+                            .setDescription(request.description())
+                            .setCategories(request.category())
+                            .setLevel(request.level())
+                            .setPrice(request.price())
+                            .setInstructorId(request.instructorId())
+                            .setDurationMinutes(request.durationMinutes())
+                            .setPublished(Boolean.TRUE.equals(request.published()));
 
-            CourseEntity savedCourseEntity= courseRepository.save(course);
-            courseEntityAtomicReference.set(savedCourseEntity);
-        });
-        if(courseEntityAtomicReference.get().getId()!=null) {
-            return new CourseResponse(
-                    courseEntityAtomicReference.get().getId(),
-                    courseEntityAtomicReference.get().getTitle(),
-                    courseEntityAtomicReference.get().getDescription(),
-                    courseEntityAtomicReference.get().getCategory(),
-                    courseEntityAtomicReference.get().getLevel().name(), // assuming enum
-                    courseEntityAtomicReference.get().getThumbnailUrl(),
-                    Collections.emptyList(),      // List<ChapterResponse>
-                    Collections.emptyList() // List<InstructorResponse>
-            );
-        }
-        else{
-            return null;
-        }
+                   return  mapToCourseResponse( courseRepository.save(course));
+
+                })
+                .orElseThrow(() -> null);
     }
 }

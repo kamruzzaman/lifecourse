@@ -15,7 +15,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 
 @Entity
-@Table(name = "chapter")
+@Table(name = "chapters",
+        indexes = @Index(name = "idx_chapter_course_id", columnList = "course_id"))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -47,12 +48,6 @@ public class ChapterEntity {
     @JoinColumn(name = "course_id", nullable = false)
     @JsonIgnore
     private CourseEntity course;
-
-    @Column(name = "file_url", length = 1000)
-    private String contentUrl;
-
-    @Column(name = "file_metadata_id")
-    private Long fileId;
 
     @CreatedDate
     @Column(name = "createdAt", nullable = false, updatable = false)

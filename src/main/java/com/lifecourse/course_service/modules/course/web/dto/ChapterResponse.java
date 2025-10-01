@@ -4,6 +4,5 @@ public record ChapterResponse(
         Long id,
         String title,
         String description,
-        Integer orderIndex,
-        String resourceUrl
+        Integer orderIndex
 ) {}
