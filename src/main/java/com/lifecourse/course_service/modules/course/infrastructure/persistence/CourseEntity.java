@@ -6,6 +6,7 @@ import com.lifecourse.course_service.modules.course.web.dto.CourseLevel;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -26,7 +27,6 @@ import java.util.Set;
 @Table(name = "courses",
         indexes = @Index(name = "idx_course_title", columnList = "title"))
 @EntityListeners(AuditingEntityListener.class)
-@Builder
 public class CourseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "course_id_generator")
@@ -60,8 +60,6 @@ public class CourseEntity {
 
     private BigDecimal price = BigDecimal.ZERO;
 
-    @Column(name = "instructor_id", nullable = false)
-    private Long instructorId;
 
     @Column(name = "duration_minutes")
     private Integer durationMinutes = 0;

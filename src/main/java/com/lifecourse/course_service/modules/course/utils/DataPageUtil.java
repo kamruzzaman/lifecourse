@@ -1,4 +1,4 @@
-package com.lifecourse.course_service.modules.course.domain;
+package com.lifecourse.course_service.modules.course.utils;
 
 import com.lifecourse.course_service.modules.course.config.DataPage;
 import org.springframework.data.domain.Page;
@@ -13,7 +13,6 @@ public class DataPageUtil {
         DataPage dataPage=new DataPage();
         if(convertToPageModel==null || convertToPageModel.getTotalElements()==0){
             dataPage.setContent(empty);
-            dataPage.setMessage("No Data Found");
         }
         else{
             dataPage.setContent(convertToPageModel.getContent());
@@ -22,7 +21,6 @@ public class DataPageUtil {
         dataPage.setLast(convertToPageModel.isLast());
         dataPage.setFirst(convertToPageModel.isFirst());
         dataPage.setSize(convertToPageModel.getSize());
-        dataPage.setMessage("Data Found");
         dataPage.setTotalElements(convertToPageModel.getTotalElements());
         dataPage.setPage(convertToPageModel.getPageable().getPageNumber());
         return dataPage;

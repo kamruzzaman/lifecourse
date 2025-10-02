@@ -3,6 +3,7 @@ package com.lifecourse.course_service.modules.course.web.dto;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 public record CreateCourseRequest(
@@ -10,7 +11,7 @@ public record CreateCourseRequest(
         @Size(max = 255)
         String title,
 
-        @Size(max = 65535)
+        @Size(max = 600)
         String description,
 
         Set<Category> category,
@@ -23,11 +24,7 @@ public record CreateCourseRequest(
         @Digits(integer = 8, fraction = 2)
         BigDecimal price,
 
-        @Size(max = 500)
-        String thumbnailUrl,
-
-        @NotNull
-        Long instructorId,
+        List<Long> userExternalId,
 
         @Min(0)
         Integer durationMinutes,

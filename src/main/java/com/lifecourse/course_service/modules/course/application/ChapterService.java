@@ -7,61 +7,51 @@ import com.lifecourse.course_service.modules.course.infrastructure.persistence.C
 import com.lifecourse.course_service.modules.course.infrastructure.persistence.ChapterRepositoryAdapter;
 import com.lifecourse.course_service.modules.course.web.dto.ChapterRequest;
 import com.lifecourse.course_service.modules.course.web.dto.ChapterResponse;
-import org.apache.commons.lang3.ObjectUtils;
-
-import org.springframework.data.domain.Page;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Optional;
+
+import static com.lifecourse.course_service.modules.course.utils.DataPageUtil.convertToDatapage;
 
 @Service
 public class ChapterService {
+
     private final ChapterRepositoryAdapter chapterRepository;
 
+    @Autowired
     public ChapterService(ChapterRepositoryAdapter chapterRepository) {
         this.chapterRepository = chapterRepository;
     }
 
-    public ApiResponse getAllChapters(Pageable pageable) {
-        ChapterBR chapterBR = new ChapterBR();
-        Page<ChapterEntity> page = chapterRepository.findAll(pageable);
-        return chapterBR.getAllChapters(page);
+    public DataPage getAllChapters(Pageable pageable) {
+         return convertToDatapage(chapterRepository.findAll(pageable));
     }
 
-    public ApiResponse getChapterById(Long id) {
-       Optional<ChapterEntity> chapter= chapterRepository.findById(id);
-       if(!chapter.isEmpty()){
-           return new ApiResponse(200, "Chapter  Found", chapter.get());
-       }
-       return  new ApiResponse(200, "Chapter Not Found", null);
-
+    public Optional<ChapterEntity>  getChapterById(Long id) {
+        return chapterRepository.findById(id);
     }
 
-    public ApiResponse createChapter(ChapterRequest request) {
-        ChapterResponse chapterResponse = chapterRepository.createChapter(request);
-        return new ApiResponse(201, "Chapter created", chapterResponse);
+    public ChapterResponse createChapter(ChapterRequest request) {
+        return  chapterRepository.createChapter(request);
     }
 
-    public ApiResponse updateChapter(Long id, ChapterRequest request) {
-        ChapterResponse chapterResponse = chapterRepository.editChapter(id, request);
-        if (ObjectUtils.isEmpty(chapterResponse)) {
-            return new ApiResponse(400, "Failed to update chapter", null);
+    public ChapterResponse updateChapter(Long id, ChapterRequest request) {
+        return  chapterRepository.editChapter(id, request);
+    }
+
+    public String deleteChapter(Long id) {
+        try {
+            chapterRepository.deleteById(id);
+            return "delete.success"; //message key
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
-        return new ApiResponse(200, "Chapter updated", chapterResponse);
     }
 
-    public ApiResponse deleteChapter(Long id) {
-        if (!chapterRepository.existsById(id)) {
-            return new ApiResponse(200, "Chapter not found", null);
-        }
-        chapterRepository.deleteById(id);
-        return new ApiResponse(200, "Chapter deleted successfully", Collections.emptyList());
-    }
-
-    public ApiResponse getAllByCourseId(Long courseId,Pageable pageable) {
-         ChapterBR chapterBR=new ChapterBR();
-         return  chapterBR.getAllCourseId(chapterRepository.findByCourseId(courseId,pageable));
+    public DataPage getAllByCourseId(Long courseId,Pageable pageable) {
+         return  convertToDatapage(chapterRepository.findByCourseId(courseId,pageable));
     }
 }
