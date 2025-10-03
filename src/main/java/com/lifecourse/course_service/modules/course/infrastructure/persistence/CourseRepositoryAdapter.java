@@ -1,5 +1,8 @@
 package com.lifecourse.course_service.modules.course.infrastructure.persistence;
 
+import cn.hutool.core.codec.Base62;
+import cn.hutool.core.codec.Base64;
+import com.lifecourse.course_service.application.util.SecurityUtils;
 import com.lifecourse.course_service.modules.course.web.dto.CourseResponse;
 import com.lifecourse.course_service.modules.course.web.dto.CreateCourseRequest;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,13 +19,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 public class CourseRepositoryAdapter {
+
     private final CourseRepository courseRepository;
+
     @Autowired
     public CourseRepositoryAdapter(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
     }
-
-
     public Page<CourseEntity> findAllByUserName(String userName, Pageable pageable) {
         return courseRepository.findAllByCreatedBy(userName,pageable);
     }
@@ -33,24 +36,28 @@ public class CourseRepositoryAdapter {
     }
 
 
-    public Optional<CourseEntity> findById(Long id) {
-       return  courseRepository.findById(id);
+    public Optional<CourseEntity> findByPublicId(String publicId) {
+       return  courseRepository.findByPublicId(publicId);
     }
 
     public CourseEntity save(CourseEntity course) {
         return courseRepository.save(course);
-
     }
 
-    public void delete(Long id) throws EntityNotFoundException {
-        if (!courseRepository.existsById(id)) {
-            throw new EntityNotFoundException("Course with id " + id + " not found");
+    public void findByPublicIdAndCreatedBy(String publicId,String currentUserr) {
+         courseRepository.findByPublicIdAndCreatedBy(publicId, currentUserr)
+                .orElseThrow(() -> new EntityNotFoundException("Course not found"));
+    }
+
+    public void delete(String publicId) throws EntityNotFoundException {
+        if (!courseRepository.existsByPublicId(publicId)) {
+            throw new EntityNotFoundException("Course with id " + publicId + " not found");
         }
-        courseRepository.deleteById(id);
+        courseRepository.deleteByPublicId(publicId);
     }
     private CourseResponse mapToCourseResponse(CourseEntity course) {
         return new CourseResponse(
-                course.getId(),
+                course.getPublicId(),
                 course.getTitle(),
                 course.getDescription(),
                 course.getCategories(),
@@ -74,20 +81,27 @@ public class CourseRepositoryAdapter {
 
     }
 
-    public CourseResponse editCourse(Long id, CreateCourseRequest request) {
-        return courseRepository.findById(id)
-                .map(course -> {
-                    course.setTitle(request.title())
-                            .setDescription(request.description())
-                            .setCategories(request.category())
-                            .setLevel(request.level())
-                            .setPrice(request.price())
-                            .setDurationMinutes(request.durationMinutes())
-                            .setPublished(Boolean.TRUE.equals(request.published()));
+    public CourseResponse editCourse(String publicId, CreateCourseRequest request) {
+        String currentUser = SecurityUtils.getCurrentUser().username();
 
-                   return  mapToCourseResponse( courseRepository.save(course));
+        CourseEntity course = courseRepository.findByPublicIdAndCreatedBy(publicId, currentUser)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Course not found for publicId=" + publicId + " and user=" + currentUser));
 
-                })
-                .orElseThrow(() -> null);
+        updateCourseEntity(course, request);
+
+        CourseEntity updatedCourse = courseRepository.save(course);
+
+        return mapToCourseResponse(updatedCourse);
+    }
+
+    private void updateCourseEntity(CourseEntity course, CreateCourseRequest request) {
+        course.setTitle(request.title())
+                .setDescription(request.description())
+                .setCategories(request.category())
+                .setLevel(request.level())
+                .setPrice(request.price())
+                .setDurationMinutes(request.durationMinutes())
+                .setPublished(Boolean.TRUE.equals(request.published()));
     }
 }

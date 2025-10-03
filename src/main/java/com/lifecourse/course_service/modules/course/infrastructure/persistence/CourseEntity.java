@@ -1,6 +1,8 @@
 package com.lifecourse.course_service.modules.course.infrastructure.persistence;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lifecourse.course_service.application.config.BaseEntity;
 import com.lifecourse.course_service.modules.course.web.dto.Category;
 import com.lifecourse.course_service.modules.course.web.dto.CourseLevel;
 import jakarta.persistence.*;
@@ -16,30 +18,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Accessors(chain = true)  // ✅ Placed after @Data
 @Entity
 @Table(name = "courses",
         indexes = @Index(name = "idx_course_title", columnList = "title"))
-@EntityListeners(AuditingEntityListener.class)
-public class CourseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "course_id_generator")
-    @TableGenerator(
-            name = "course_id_generator",
-            table = "id_generator_table",
-            pkColumnName = "gen_name",
-            valueColumnName = "gen_value",
-            pkColumnValue = "course_id",
-            allocationSize = 1
-    )
-    private Long id;
-
+public class CourseEntity extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
@@ -61,29 +47,14 @@ public class CourseEntity {
     private BigDecimal price = BigDecimal.ZERO;
 
 
+
     @Column(name = "duration_minutes")
     private Integer durationMinutes = 0;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean published = false;
 
-    @CreatedDate
-    @Column(name = "createdAt", nullable = false, updatable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
-    private Instant createdAt;
 
-    @CreatedBy
-    @Column(name = "createdBy", nullable = false, updatable = false)
-    private String createdBy;
-
-    @LastModifiedDate
-    @Column(name = "updatedAt", nullable = true)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
-    private Instant updatedAt;
-
-    @LastModifiedBy
-    @Column(name = "updatedBy", nullable = true)
-    private String updatedBy;
 
 
 }

@@ -50,7 +50,7 @@ public class CourseController {
         );
     }
 
-    @GetMapping("by/{userId}")
+    @GetMapping("enroll/by/{userId}")
     public ResponseEntity<ApiResponse> getAllCoursesByEnroll(@PathVariable String username, Pageable pageable,Locale locale) {
         return ResponseUtil.buildResponse(
                 HttpMethod.GET,
@@ -62,11 +62,11 @@ public class CourseController {
     }
 
     // GET /courses/{id} - Get course details
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse>  getCourseById(@PathVariable Long id,Locale locale) {
+    @GetMapping("/{publicId}")
+    public ResponseEntity<ApiResponse>  getCourseById(@PathVariable String publicId,Locale locale) {
         return ResponseUtil.buildResponse(
                 HttpMethod.GET,
-                courseService.getCourseById(id),
+                courseService.getCourseById(publicId),
                 messageSource,
                 "get.success",
                 locale
@@ -86,12 +86,12 @@ public class CourseController {
     }
 
     // PUT /courses/{id} - Update existing course
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateCourse(@PathVariable Long id,
+    @PutMapping("/{publicId}")
+    public ResponseEntity<ApiResponse> updateCourse(@PathVariable String publicId,
                                                   @Valid @RequestBody CreateCourseRequest courseDto,Locale locale) {
         return ResponseUtil.buildResponse(
                 HttpMethod.PUT,
-                courseService.updateCourse(id, courseDto),
+                courseService.updateCourse(publicId, courseDto),
                 messageSource,
                 "patch.success",
                 locale
@@ -99,11 +99,11 @@ public class CourseController {
     }
 
     // DELETE /courses/{id} - Delete a course
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteCourse(@PathVariable Long id,Locale locale) {
+    @DeleteMapping("/{publicId}")
+    public ResponseEntity<ApiResponse> deleteCourse(@PathVariable String publicId,Locale locale) {
         return ResponseUtil.buildResponse(
                 HttpMethod.DELETE,
-                courseService.deleteCourse(id),
+                courseService.deleteCourse(publicId),
                 messageSource,
                 "delete.success",
                 locale

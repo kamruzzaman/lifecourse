@@ -24,6 +24,9 @@ public record CreateCourseRequest(
         @Digits(integer = 8, fraction = 2)
         BigDecimal price,
 
+        @NotNull
+        Currency currency,
+
         List<Long> userExternalId,
 
         @Min(0)

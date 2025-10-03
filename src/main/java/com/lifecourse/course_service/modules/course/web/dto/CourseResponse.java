@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 public record CourseResponse(
-        Long id,
+        String id,
         String title,
         String description,
         Set<Category> category,
