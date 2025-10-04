@@ -2,6 +2,7 @@ package com.lifecourse.course_service.modules.course.infrastructure.persistence;
 
 import cn.hutool.core.codec.Base62;
 import cn.hutool.core.codec.Base64;
+import com.lifecourse.course_service.application.exceptions.CourseNotFoundException;
 import com.lifecourse.course_service.application.util.SecurityUtils;
 import com.lifecourse.course_service.modules.course.web.dto.CourseResponse;
 import com.lifecourse.course_service.modules.course.web.dto.CreateCourseRequest;
@@ -46,12 +47,12 @@ public class CourseRepositoryAdapter {
 
     public void findByPublicIdAndCreatedBy(String publicId,String currentUserr) {
          courseRepository.findByPublicIdAndCreatedBy(publicId, currentUserr)
-                .orElseThrow(() -> new EntityNotFoundException("Course not found"));
+                .orElseThrow(() -> new CourseNotFoundException("Course not found"));
     }
 
     public void delete(String publicId) throws EntityNotFoundException {
         if (!courseRepository.existsByPublicId(publicId)) {
-            throw new EntityNotFoundException("Course with id " + publicId + " not found");
+            throw new CourseNotFoundException("Course with id " + publicId + " not found");
         }
         CourseEntity course=courseRepository.findTopByPublicId(publicId);
         courseRepository.delete(course);
@@ -86,7 +87,7 @@ public class CourseRepositoryAdapter {
         String currentUser = SecurityUtils.getCurrentUser().username();
 
         CourseEntity course = courseRepository.findByPublicIdAndCreatedBy(publicId, currentUser)
-                .orElseThrow(() -> new EntityNotFoundException(
+                .orElseThrow(() -> new CourseNotFoundException(
                         "Course not found for publicId=" + publicId + " and user=" + currentUser));
 
         updateCourseEntity(course, request);

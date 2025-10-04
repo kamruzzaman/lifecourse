@@ -8,40 +8,52 @@ import com.lifecourse.course_service.modules.course.infrastructure.persistence.C
 import com.lifecourse.course_service.modules.course.infrastructure.persistence.EnrollmentRepositoryAdapter;
 import com.lifecourse.course_service.modules.course.web.dto.CourseResponse;
 import com.lifecourse.course_service.modules.course.web.dto.CreateCourseRequest;
+import com.lifecourse.course_service.modules.course.web.dto.EnrollmentCourseRequest;
+import com.lifecourse.course_service.modules.course.web.dto.EnrollmentCourseResponse;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static com.lifecourse.course_service.modules.course.utils.DataPageUtil.convertToDatapage;
 
 @Service
-public class CourseService  {
+public class EnrollmentService {
 
-    private final CourseRepositoryAdapter course;
+    private final CourseRepositoryAdapter courseAdapter;
     private final EnrollmentRepositoryAdapter enrollmentRepositoryAdapter;
-    public CourseService(CourseRepositoryAdapter course, EnrollmentRepositoryAdapter enrollmentRepositoryAdapter) {
-        this.course = course;
+    public EnrollmentService(CourseRepositoryAdapter course, EnrollmentRepositoryAdapter enrollmentRepositoryAdapter) {
+        this.courseAdapter = course;
         this.enrollmentRepositoryAdapter = enrollmentRepositoryAdapter;
     }
     public DataPage getAllCourses(Pageable pageable) {
-        return convertToDatapage(course.findAll(pageable));
+        return convertToDatapage(enrollmentRepositoryAdapter.findAll(pageable));
     }
     public DataPage getAllCoursesByUser(String username, Pageable pageable) {
-         return convertToDatapage(course.findAllByUserName(username,pageable));
+         return convertToDatapage(courseAdapter.findAllByUserName(username,pageable));
     }
     public Optional<CourseEntity> getCourseById(String publicId) {
-        return course.findByPublicId(publicId);
+        return courseAdapter.findByPublicId(publicId);
     }
-    public  CourseResponse createCourse(CreateCourseRequest createCourseRequest) {
-       return course.createCourse(createCourseRequest);
+
+    public EnrollmentCourseResponse createCourse(EnrollmentCourseRequest enrollmentCourseRequest) {
+        String userId = enrollmentCourseRequest.userExternalPublicId();
+        String coursePublicId = enrollmentCourseRequest.coursePublicId();
+        CourseEntity courseEntity = courseAdapter.findByPublicId(coursePublicId)
+                .orElseThrow(() -> new CourseNotFoundException("Course not found for publicId: " + coursePublicId));
+
+        // ✅ If already enrolled, stop early
+        if (isUserAlreadyEnrolled( courseEntity.getId(),userId)) {
+            throw new CourseNotFoundException("User is already enrolled in this course");
+        }
+
+        // ✅ Add user to course and return response
+        return enrollmentRepositoryAdapter.addUserToCourse(enrollmentCourseRequest, courseEntity);
     }
     public CourseResponse updateCourse(String publicId, CreateCourseRequest createCourseRequest) {
        try {
-           return course.editCourse(publicId, createCourseRequest);
+           return courseAdapter.editCourse(publicId, createCourseRequest);
        }
        catch (EntityNotFoundException ex){
            return null;
@@ -50,7 +62,7 @@ public class CourseService  {
     public String deleteCourse(String publicId) {
         try {
             if(isEligibleForDeletion(publicId) && isAdminOrCreatedByCurrentUser(publicId)) {
-                course.delete(publicId);
+                courseAdapter.delete(publicId);
                 return "delete.success"; //message key
             }
             else{
@@ -66,7 +78,7 @@ public class CourseService  {
           return true;
         }
         try {
-            course.findByPublicIdAndCreatedBy(publicId, SecurityUtils.getCurrentUser().username());
+            courseAdapter.findByPublicIdAndCreatedBy(publicId, SecurityUtils.getCurrentUser().username());
             return true;
         }
         catch (EntityNotFoundException ex){
@@ -75,11 +87,12 @@ public class CourseService  {
     }
 
     private boolean isEligibleForDeletion(String publicId) {
-        CourseEntity courseEntity = course.findByPublicId(publicId)
-                .orElseThrow(() -> new CourseNotFoundException("Course not found for publicId: " + publicId));
-       return !enrollmentRepositoryAdapter.checkCourseHaveStudent(courseEntity.getId());
+      return false;
+        // return !enrollmentRepositoryAdapter.checkCourseHaveStudent(publicId);
     }
 
-
+    private boolean isUserAlreadyEnrolled(Long courseId,String userExternalId) {
+        return enrollmentRepositoryAdapter.checkCourseHaveStudentAndStatusDrop(courseId,userExternalId);
+    }
 
 }

@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Map<String, Object>> handleValidationJsonParse(MethodArgumentNotValidException ex) {
@@ -63,6 +61,15 @@ public class GlobalExceptionHandler {
         listMap.add(mapError);
         response.put("error", mapError);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CourseNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBusinessValidationException(CourseNotFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.UNPROCESSABLE_ENTITY.value()); // 422 — suitable for business logic violations
+        response.put("error", "Business Validation Failed");
+        response.put("message", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
 }

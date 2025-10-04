@@ -1,5 +1,6 @@
 package com.lifecourse.course_service.modules.course.infrastructure.persistence;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lifecourse.course_service.modules.course.web.dto.EnrollmentStatus;
 import com.lifecourse.course_service.modules.course.web.dto.Grade;
 import jakarta.persistence.*;
@@ -21,10 +22,6 @@ public class CourseEnrollment {
     @EmbeddedId
     private CourseEnrollmentId id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("courseId") // maps courseId from composite key
-    @JoinColumn(name = "course_id", nullable = false)
-    private CourseEntity course;
     @Column(name = "enrollment_date", updatable = false)
     private LocalDateTime enrollmentDate = LocalDateTime.now();
 
