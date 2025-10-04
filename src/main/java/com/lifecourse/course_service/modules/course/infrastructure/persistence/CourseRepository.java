@@ -16,4 +16,6 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
     void deleteByPublicId(String publicId);
 
     boolean existsByPublicId(String publicId);
+
+    CourseEntity findTopByPublicId(String publicId);
 }

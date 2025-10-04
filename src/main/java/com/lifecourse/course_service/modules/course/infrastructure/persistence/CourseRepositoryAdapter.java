@@ -53,7 +53,8 @@ public class CourseRepositoryAdapter {
         if (!courseRepository.existsByPublicId(publicId)) {
             throw new EntityNotFoundException("Course with id " + publicId + " not found");
         }
-        courseRepository.deleteByPublicId(publicId);
+        CourseEntity course=courseRepository.findTopByPublicId(publicId);
+        courseRepository.delete(course);
     }
     private CourseResponse mapToCourseResponse(CourseEntity course) {
         return new CourseResponse(
